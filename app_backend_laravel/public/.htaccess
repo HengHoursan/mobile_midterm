@@ -1,0 +1,12 @@
+# Allow CORS for all origins (development only)
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+Header always set Access-Control-Allow-Credentials "true"
+
+# Handle image files
+<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET"
+    Header always set Access-Control-Allow-Headers "Content-Type"
+</FilesMatch>
