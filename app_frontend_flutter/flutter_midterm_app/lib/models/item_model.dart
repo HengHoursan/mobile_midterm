@@ -28,7 +28,9 @@ class Item {
       qty: int.parse(json['qty'].toString()),
       unitPrice: double.parse(json['unit_price'].toString()),
       itemImage: json['item_image'],
-      status: json['status'] != null ? int.tryParse(json['status'].toString()) : null,
+      status: json['status'] != null
+          ? int.tryParse(json['status'].toString())
+          : null,
     );
   }
 
