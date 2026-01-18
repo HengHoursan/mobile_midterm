@@ -21,11 +21,11 @@ class Item {
 
   factory Item.fromJson(Map<String, dynamic> json) {
     return Item(
-      itemId: json['id'],
+      itemId: int.tryParse(json['item_id'].toString()),
       itemName: json['item_name'],
       category: json['category'],
       description: json['description'],
-      qty: json['qty'],
+      qty: int.parse(json['qty'].toString()),
       unitPrice: double.parse(json['unit_price'].toString()),
       itemImage: json['item_image'],
       status: json['status'] != null ? int.tryParse(json['status'].toString()) : null,

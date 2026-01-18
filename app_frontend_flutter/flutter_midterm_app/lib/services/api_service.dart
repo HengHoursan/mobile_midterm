@@ -69,11 +69,15 @@ class ApiService {
       } on FormatException {
         // If JSON decoding fails, check if the response body contains "success"
         if (!responseBody.toLowerCase().contains('success')) {
-          throw Exception('Failed to insert item. Unexpected response: $responseBody');
+          throw Exception(
+            'Failed to insert item. Unexpected response: $responseBody',
+          );
         }
       }
     } else {
-      throw Exception('Failed to insert item. Status code: ${response.statusCode}');
+      throw Exception(
+        'Failed to insert item. Status code: ${response.statusCode}',
+      );
     }
   }
 
@@ -87,8 +91,11 @@ class ApiService {
     request.fields['category'] = item.category ?? '';
     request.fields['description'] = item.description ?? '';
     request.fields['qty'] = item.qty.toString();
+    if (item.status != null) {
+      request.fields['status'] = item.status.toString();
+    }
     request.fields['unit_price'] = item.unitPrice.toString();
-    // Assuming itemImage in Item model holds the current image name if not being updated
+    // Assuming itemImage in Item model holds the current i
     if (item.itemImage != null && imageFile == null) {
       request.fields['current_item_image'] = item.itemImage!;
     }
@@ -102,20 +109,52 @@ class ApiService {
     }
 
     var response = await request.send();
+    final responseBody = (await response.stream.bytesToString()).trim();
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to update item.');
+    if (response.statusCode == 200) {
+      try {
+        final decoded = json.decode(responseBody);
+        if (decoded is Map && decoded['success'] == false) {
+          throw Exception(decoded['message'] ?? 'Failed to update item.');
+        }
+      } on FormatException {
+        if (!responseBody.toLowerCase().contains('success')) {
+          throw Exception(
+            'Failed to update item. Unexpected response: $responseBody',
+          );
+        }
+      }
+    } else {
+      throw Exception(
+        'Failed to update item. Status code: ${response.statusCode}',
+      );
     }
   }
 
-  Future<void> deleteItem(int itemId) async {
+Future<void> deleteItem(int itemId) async {
     final response = await http.post(
       Uri.parse('$baseUrl/delete_item.php'),
       body: {'item_id': itemId.toString()},
     );
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to delete item.');
+    if (response.statusCode == 200) {
+      final responseBody = response.body.trim();
+      try {
+        final decoded = json.decode(responseBody);
+        if (decoded is Map && decoded['success'] == false) {
+          throw Exception(decoded['message'] ?? 'Failed to delete item.');
+        }
+      } on FormatException {
+        if (!responseBody.toLowerCase().contains('success')) {
+          throw Exception(
+            'Failed to delete item. Unexpected response: $responseBody',
+          );
+        }
+      }
+    } else {
+      throw Exception(
+        'Failed to delete item. Status code: ${response.statusCode}',
+      );
     }
   }
 }

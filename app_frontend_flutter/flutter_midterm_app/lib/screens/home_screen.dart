@@ -48,16 +48,38 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _deleteItem(int itemId) async {
-    try {
-      await _apiService.deleteItem(itemId);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Item deleted successfully!')),
-      );
-      _fetchItems(); // Refresh the list
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete item: $e')),
-      );
+    final bool? confirmed = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Delete'),
+        content: const Text('Are you sure you want to delete this item?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await _apiService.deleteItem(itemId);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item deleted successfully!')),
+        );
+        _fetchItems(); // Refresh the list
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete item: $e')),
+        );
+      }
     }
   }
 
@@ -85,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 final item = snapshot.data![index];
                 // Build image URL once so it's easy to debug
                 final imageUrl = (item.itemImage != null && item.itemImage!.isNotEmpty)
-                    ? '${_apiService.baseUrl}/serve_image.php?file=${Uri.encodeComponent(item.itemImage!)}'
+                    ? '${_apiService.baseUrl}/uploads/${item.itemImage!}'
                     : null;
                 
                 // Debug print to console

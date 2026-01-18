@@ -161,7 +161,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                   : (widget.item.itemImage != null && widget.item.itemImage!.isNotEmpty
                       ? Builder(
                           builder: (context) {
-                            final imageUrl = '${_apiService.baseUrl}/serve_image.php?file=${Uri.encodeComponent(widget.item.itemImage!)}';
+                            final imageUrl = '${_apiService.baseUrl}/uploads/${widget.item.itemImage!}';
                             print('Attempting to load image from EditScreen: $imageUrl'); // Debug print
                             return Image.network(
                               imageUrl,
