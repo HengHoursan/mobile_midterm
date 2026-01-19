@@ -11,43 +11,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-require_once __DIR__ . '/../functions/item_functions.php';
+require_once __DIR__ . '/../functions/product_functions.php';
 
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // Validate and sanitize input
-        $itemId = filter_input(INPUT_POST, 'item_id', FILTER_VALIDATE_INT);
-        $itemName = filter_input(INPUT_POST, 'item_name', FILTER_SANITIZE_STRING);
+        $productId = filter_input(INPUT_POST, 'product_id', FILTER_VALIDATE_INT);
+        $productName = filter_input(INPUT_POST, 'product_name', FILTER_SANITIZE_STRING);
         $category = filter_input(INPUT_POST, 'category', FILTER_SANITIZE_STRING);
         $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_STRING);
         $qty = filter_input(INPUT_POST, 'qty', FILTER_VALIDATE_INT);
         $unitPrice = filter_input(INPUT_POST, 'unit_price', FILTER_VALIDATE_FLOAT);
         $status = filter_input(INPUT_POST, 'status', FILTER_SANITIZE_STRING) ?? 'active';
-        $currentImage = filter_input(INPUT_POST, 'current_item_image', FILTER_SANITIZE_STRING);
+        $currentImage = filter_input(INPUT_POST, 'current_product_image', FILTER_SANITIZE_STRING);
 
-        if (!$itemId || !$itemName || $qty === false || $unitPrice === false) {
+        if (!$productId || !$productName || $qty === false || $unitPrice === false) {
             throw new Exception("Invalid input data.");
         }
 
         $data = [
-            'item_id' => $itemId,
-            'item_name' => $itemName,
+            'product_id' => $productId,
+            'product_name' => $productName,
             'category' => $category,
             'description' => $description,
             'qty' => $qty,
             'unit_price' => $unitPrice,
             'status' => $status,
-            'current_item_image' => $currentImage, // Pass current image name
+            'current_product_image' => $currentImage, // Pass current image name
         ];
 
-        $rowCount = updateItem($data);
+        $rowCount = updateProduct($data);
 
         if ($rowCount > 0) {
-            echo json_encode(['success' => true, 'message' => 'Item updated successfully']);
+            echo json_encode(['success' => true, 'message' => 'product updated successfully']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'No changes were made or item not found.']);
+            echo json_encode(['success' => false, 'message' => 'No changes were made or product not found.']);
         }
     } catch (Exception $e) {
         http_response_code(500); // Internal Server Error

@@ -3,21 +3,21 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../models/item_model.dart';
+import '../models/product_model.dart';
 import '../services/api_service.dart';
 
-class EditItemScreen extends StatefulWidget {
-  final Item item;
+class EditProductScreen extends StatefulWidget {
+  final Product product;
 
-  const EditItemScreen({super.key, required this.item});
+  const EditProductScreen({super.key, required this.product});
 
   @override
-  State<EditItemScreen> createState() => _EditItemScreenState();
+  State<EditProductScreen> createState() => _EditProductScreenState();
 }
 
-class _EditItemScreenState extends State<EditItemScreen> {
+class _EditProductScreenState extends State<EditProductScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _itemNameController;
+  late TextEditingController _productNameController;
   late TextEditingController _categoryController;
   late TextEditingController _descriptionController;
   late TextEditingController _qtyController;
@@ -29,13 +29,13 @@ class _EditItemScreenState extends State<EditItemScreen> {
   @override
   void initState() {
     super.initState();
-    _itemNameController = TextEditingController(text: widget.item.itemName);
-    _categoryController = TextEditingController(text: widget.item.category);
+    _productNameController = TextEditingController(text: widget.product.productName);
+    _categoryController = TextEditingController(text: widget.product.category);
     _descriptionController =
-        TextEditingController(text: widget.item.description);
-    _qtyController = TextEditingController(text: widget.item.qty.toString());
+        TextEditingController(text: widget.product.description);
+    _qtyController = TextEditingController(text: widget.product.qty.toString());
     _unitPriceController =
-        TextEditingController(text: widget.item.unitPrice.toString());
+        TextEditingController(text: widget.product.unitPrice.toString());
   }
 
   Future<void> _pickImage() async {
@@ -53,9 +53,9 @@ class _EditItemScreenState extends State<EditItemScreen> {
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final updatedItem = Item(
-        itemId: widget.item.itemId,
-        itemName: _itemNameController.text,
+      final updatedProduct = Product(
+        productId: widget.product.productId,
+        productName: _productNameController.text,
         category:
             _categoryController.text.isEmpty ? null : _categoryController.text,
         description: _descriptionController.text.isEmpty
@@ -63,16 +63,16 @@ class _EditItemScreenState extends State<EditItemScreen> {
             : _descriptionController.text,
         qty: int.parse(_qtyController.text),
         unitPrice: double.parse(_unitPriceController.text),
-        itemImage:
-            widget.item.itemImage, // Keep existing image if not updated
+        productImage:
+            widget.product.productImage, // Keep existing image if not updated
       );
 
       try {
-        await _apiService.updateItem(updatedItem, _imageFile);
+        await _apiService.updateProduct(updatedProduct, _imageFile);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Item updated successfully!'),
+            content: Text('Product updated successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -81,7 +81,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update item: $e'),
+            content: Text('Failed to update product: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -91,7 +91,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
 
   @override
   void dispose() {
-    _itemNameController.dispose();
+    _productNameController.dispose();
     _categoryController.dispose();
     _descriptionController.dispose();
     _qtyController.dispose();
@@ -103,7 +103,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Item'),
+        title: const Text('Edit Product'),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -131,8 +131,8 @@ class _EditItemScreenState extends State<EditItemScreen> {
             padding: const EdgeInsets.all(16.0),
             children: [
               _buildTextField(
-                  controller: _itemNameController,
-                  label: 'Item Name',
+                  controller: _productNameController,
+                  label: 'Product Name',
                   icon: Icons.label_important),
               _buildTextField(
                   controller: _categoryController,
@@ -178,7 +178,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
               ElevatedButton.icon(
                 onPressed: _submitForm,
                 icon: const Icon(Icons.save_alt_outlined),
-                label: const Text('Update Item'),
+                label: const Text('Update Product'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   textStyle: const TextStyle(fontSize: 18),
@@ -237,9 +237,9 @@ class _EditItemScreenState extends State<EditItemScreen> {
   }
 
   Widget _buildImagePicker() {
-    final currentImageUrl = (widget.item.itemImage != null &&
-            widget.item.itemImage!.isNotEmpty)
-        ? '${_apiService.baseUrl}/uploads/${widget.item.itemImage!}'
+    final currentImageUrl = (widget.product.productImage != null &&
+            widget.product.productImage!.isNotEmpty)
+        ? '${_apiService.baseUrl}/uploads/${widget.product.productImage!}'
         : null;
 
     return Column(

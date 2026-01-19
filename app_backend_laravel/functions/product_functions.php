@@ -1,16 +1,16 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 
-function fetchItems() {
+function fetchProducts() {
     global $pdo;
-    $stmt = $pdo->query('SELECT * FROM tblitems');
+    $stmt = $pdo->query('SELECT * FROM tblproduct');
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function fetchItem($id) {
+function fetchProduct($id) {
     global $pdo;
-    $stmt = $pdo->prepare('SELECT * FROM tblitems WHERE item_id = :item_id');
-    $stmt->execute(['item_id' => $id]);
+    $stmt = $pdo->prepare('SELECT * FROM tblproduct WHERE product_id = :id');
+    $stmt->execute(['id' => $id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
@@ -49,13 +49,13 @@ function uploadImage($file) {
     }
 }
 
-function insertItem($data) {
+function insertProduct($data) {
     global $pdo;
 
-    $item_image = null;
-    if (isset($_FILES['item_image']) && $_FILES['item_image']['error'] == UPLOAD_ERR_OK) {
+    $product_image = null;
+    if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] == UPLOAD_ERR_OK) {
         try {
-            $item_image = uploadImage($_FILES['item_image']);
+            $product_image = uploadImage($_FILES['product_image']);
         } catch (Exception $e) {
             // Handle error, e.g., log it or return a specific error message
             error_log("Image upload failed: " . $e->getMessage());
@@ -63,81 +63,81 @@ function insertItem($data) {
         }
     }
     
-    $sql = "INSERT INTO tblitems (item_name, category, description, qty, unit_price, item_image, status) 
-            VALUES (:item_name, :category, :description, :qty, :unit_price, :item_image, :status)";
+    $sql = "INSERT INTO tblproduct (product_name, category, description, qty, unit_price, product_image, status) 
+            VALUES (:product_name, :category, :description, :qty, :unit_price, :product_image, :status)";
     $stmt= $pdo->prepare($sql);
     $stmt->execute([
-        'item_name' => $data['item_name'],
+        'product_name' => $data['product_name'],
         'category' => $data['category'] ?? null,
         'description' => $data['description'] ?? null,
         'qty' => $data['qty'],
         'unit_price' => $data['unit_price'],
-        'item_image' => $item_image,
+        'product_image' => $product_image,
         'status' => $data['status'] ?? 'active' // Default status
     ]);
     return $pdo->lastInsertId();
 }
 
-function updateItem($data) {
+function updateProduct($data) {
     global $pdo;
 
-    $item_image = $data['current_item_image'] ?? null; // Keep existing image by default
+    $product_image = $data['current_product_image'] ?? null; // Keep existing image by default
 
-    if (isset($_FILES['item_image']) && $_FILES['item_image']['error'] == UPLOAD_ERR_OK) {
+    if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] == UPLOAD_ERR_OK) {
         try {
             // Delete old image if it exists
-            if ($item_image && file_exists(__DIR__ . "/../public/uploads/" . $item_image)) {
-                 unlink(__DIR__ . "/../public/uploads/" . $item_image);
+            if ($product_image && file_exists(__DIR__ . "/../public/uploads/" . $product_image)) {
+                 unlink(__DIR__ . "/../public/uploads/" . $product_image);
             }
-            $item_image = uploadImage($_FILES['item_image']);
+            $product_image = uploadImage($_FILES['product_image']);
         } catch (Exception $e) {
             error_log("Image upload failed during update: " . $e->getMessage());
             throw $e;
         }
-    } else if (isset($data['current_item_image']) && empty($_FILES['item_image']['name'])) {
+    } else if (isset($data['current_product_image']) && empty($_FILES['product_image']['name'])) {
         // If no new image is uploaded and current_item_image is provided, retain it
-        $item_image = $data['current_item_image'];
+        $product_image = $data['current_product_image'];
     } else {
-        $item_image = null; // No image for update
+        $product_image = null; // No image for update
     }
 
 
-    $sql = "UPDATE tblitems SET 
-                item_name = :item_name, 
+    $sql = "UPDATE tblproduct SET 
+                product_name = :product_name, 
                 category = :category, 
                 description = :description, 
                 qty = :qty, 
                 unit_price = :unit_price, 
-                item_image = :item_image, 
+                product_image = :product_image, 
                 status = :status 
-            WHERE item_id = :item_id";
+            WHERE product_id = :product_id";
     $stmt= $pdo->prepare($sql);
     $stmt->execute([
-        'item_id' => $data['item_id'],
-        'item_name' => $data['item_name'],
+        'product_id' => $data['product_id'],
+        'product_name' => $data['product_name'],
         'category' => $data['category'] ?? null,
         'description' => $data['description'] ?? null,
         'qty' => $data['qty'],
         'unit_price' => $data['unit_price'],
-        'item_image' => $item_image,
+        'product_image' => $product_image,
         'status' => $data['status'] ?? 'active' // Default status
     ]);
     return $stmt->rowCount();
 }
 
-function deleteItem($itemId) {
+function deleteProduct($productId) {
     global $pdo;
     
     // First, get the item to delete its image if it exists
-    $item = fetchItem($itemId);
-    if ($item && isset($item['item_image']) && $item['item_image']) {
-        $imagePath = __DIR__ . "/../public/uploads/" . $item['item_image'];
+    $product = fetchProduct($productId);
+    if ($ $product && isset($item['product_image']) &&  $product['product_image']) {
+        $imagePath = __DIR__ . "/../public/uploads/" .  $product['product_image'];
         if (file_exists($imagePath)) {
             unlink($imagePath); // Delete the image file
         }
     }
 
-    $stmt = $pdo->prepare('DELETE FROM tblitems WHERE item_id = :item_id');
-    return $stmt->execute(['item_id' => $itemId]);
+    $stmt = $pdo->prepare('DELETE FROM tblproduct WHERE product_id = :product_id');
+    return $stmt->execute(['product_id' =>  $productId]);
 }
 ?>

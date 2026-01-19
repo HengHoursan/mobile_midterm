@@ -1,48 +1,46 @@
-class Item {
-  final int? itemId;
-  final String itemName;
+class Product {
+  final int? productId;
+  final String productName;
   final String? category;
   final String? description;
   final int qty;
   final double unitPrice;
-  final String? itemImage;
-  final int? status;
+  final String? productImage;
+  final String? status;
 
-  Item({
-    this.itemId,
-    required this.itemName,
+  Product({
+    this.productId,
+    required this.productName,
     this.category,
     this.description,
     required this.qty,
     required this.unitPrice,
-    this.itemImage,
+    this.productImage,
     this.status,
   });
 
-  factory Item.fromJson(Map<String, dynamic> json) {
-    return Item(
-      itemId: int.tryParse(json['item_id'].toString()),
-      itemName: json['item_name'],
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      productId: int.tryParse(json['product_id'].toString()),
+      productName: json['product_name'],
       category: json['category'],
       description: json['description'],
       qty: int.parse(json['qty'].toString()),
       unitPrice: double.parse(json['unit_price'].toString()),
-      itemImage: json['item_image'],
-      status: json['status'] != null
-          ? int.tryParse(json['status'].toString())
-          : null,
+      productImage: json['product_image'],
+      status: json['status']?.toString(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'item_id': itemId,
-      'item_name': itemName,
+      'product_id': productId,
+      'product_name': productName,
       'category': category,
       'description': description,
       'qty': qty,
       'unit_price': unitPrice,
-      'item_image': itemImage,
+      'product_image': productImage,
       'status': status,
     };
   }

@@ -11,13 +11,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-require_once __DIR__ . '/../functions/item_functions.php';
+require_once __DIR__ . '/../functions/product_functions.php';
 
 header('Content-Type: application/json');
 
 try {
-    $items = fetchItems();
-    echo json_encode(['success' => true, 'data' => $items]);
+    $products = fetchProducts();
+    echo json_encode(['success' => true, 'data' => $products]);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }

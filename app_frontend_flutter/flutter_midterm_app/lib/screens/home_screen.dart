@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_midterm_app/screens/add_item_screen.dart';
-import 'package:flutter_midterm_app/screens/edit_item_screen.dart';
+import 'package:flutter_midterm_app/screens/add_product_screen.dart';
+import 'package:flutter_midterm_app/screens/edit_product_screen.dart';
 
-import '../models/item_model.dart';
+import '../models/product_model.dart';
 import '../services/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,47 +13,47 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late Future<List<Item>> _itemsFuture;
+  late Future<List<Product>> _productsFuture;
   final ApiService _apiService = ApiService();
 
   @override
   void initState() {
     super.initState();
-    _fetchItems();
+    _fetchProducts();
   }
 
-  void _fetchItems() {
+  void _fetchProducts() {
     setState(() {
-      _itemsFuture = _apiService.fetchItems();
+      _productsFuture = _apiService.fetchProducts();
     });
   }
 
   void _navigateToAddItemScreen() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const AddItemScreen()),
+      MaterialPageRoute(builder: (context) => const AddProductScreen()),
     );
     if (result == true) {
-      _fetchItems();
+      _fetchProducts();
     }
   }
 
-  void _editItem(Item item) async {
+  void _editItem(Product product) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => EditItemScreen(item: item)),
+      MaterialPageRoute(builder: (context) => EditProductScreen(product: product)),
     );
     if (result == true) {
-      _fetchItems();
+      _fetchProducts();
     }
   }
 
-  void _deleteItem(int itemId) async {
+  void _deleteItem(int productId) async {
     final bool? confirmed = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Delete'),
-        content: const Text('Are you sure you want to delete this item?'),
+        content: const Text('Are you sure you want to delete this product?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -70,20 +70,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (confirmed == true) {
       try {
-        await _apiService.deleteItem(itemId);
+        await _apiService.deleteProduct(productId);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Item deleted successfully!'),
+            content: Text('Product deleted successfully!'),
             backgroundColor: Colors.green,
           ),
         );
-        _fetchItems();
+        _fetchProducts();
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to delete item: $e'),
+            content: Text('Failed to delete product: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -95,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inventory',
+        title: const Text('Product Lists',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -109,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _fetchItems,
+            onPressed: _fetchProducts,
           ),
         ],
       ),
@@ -124,8 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: FutureBuilder<List<Item>>(
-          future: _itemsFuture,
+        child: FutureBuilder<List<Product>>(
+          future: _productsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton.icon(
-                        onPressed: _fetchItems,
+                        onPressed: _fetchProducts,
                         icon: const Icon(Icons.refresh),
                         label: const Text('Retry'),
                       )
@@ -162,10 +162,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     Icon(Icons.inventory_2_outlined,
                         size: 100, color: Colors.grey.shade400),
                     const SizedBox(height: 20),
-                    const Text('No items found.',
+                    const Text('No products found.',
                         style: TextStyle(fontSize: 18, color: Colors.grey)),
                     const SizedBox(height: 10),
-                    const Text('Tap the "+" button to add a new item.',
+                    const Text('Tap the "+" button to add a new product.',
                         style: TextStyle(fontSize: 14, color: Colors.grey)),
                   ],
                 ),
@@ -175,10 +175,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.all(8.0),
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
-                  final item = snapshot.data![index];
-                  final imageUrl = (item.itemImage != null &&
-                          item.itemImage!.isNotEmpty)
-                      ? '${_apiService.baseUrl}/uploads/${item.itemImage!}'
+                  final product = snapshot.data![index];
+                  final imageUrl = (product.productImage != null &&
+                          product.productImage!.isNotEmpty)
+                      ? '${_apiService.baseUrl}/uploads/${product.productImage!}'
                       : null;
 
                   return Card(
@@ -214,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       title: Text(
-                        item.itemName,
+                        product.productName,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
@@ -224,14 +224,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 4),
-                          if (item.category != null &&
-                              item.category!.isNotEmpty)
-                            Text('Category: ${item.category}',
+                          if (product.category != null &&
+                              product.category!.isNotEmpty)
+                            Text('Category: ${product.category}',
                                 style: TextStyle(color: Colors.grey.shade600)),
-                          Text('Qty: ${item.qty}',
+                          Text('Qty: ${product.qty}',
                               style: TextStyle(color: Colors.grey.shade600)),
                           Text(
-                            'Price: ${item.unitPrice.toStringAsFixed(2)}',
+                            'Price: ${product.unitPrice.toStringAsFixed(2)}',
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF3949AB)),
@@ -244,11 +244,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           IconButton(
                             icon:
                                 const Icon(Icons.edit, color: Colors.blueGrey),
-                            onPressed: () => _editItem(item),
+                            onPressed: () => _editItem(product),
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _deleteItem(item.itemId!),
+                            onPressed: () => _deleteItem(product.productId!),
                           ),
                         ],
                       ),
@@ -262,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _navigateToAddItemScreen,
-        label: const Text('Add Item'),
+        label: const Text('Add Product'),
         icon: const Icon(Icons.add),
         backgroundColor: const Color(0xFF5C6BC0),
       ),

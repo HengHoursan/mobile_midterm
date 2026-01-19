@@ -3,19 +3,19 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../models/item_model.dart';
+import '../models/product_model.dart';
 import '../services/api_service.dart';
 
-class AddItemScreen extends StatefulWidget {
-  const AddItemScreen({super.key});
+class AddProductScreen extends StatefulWidget {
+  const AddProductScreen({super.key});
 
   @override
-  State<AddItemScreen> createState() => _AddItemScreenState();
+  State<AddProductScreen> createState() => _AddProductScreenState();
 }
 
-class _AddItemScreenState extends State<AddItemScreen> {
+class _AddProductScreenState extends State<AddProductScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _itemNameController = TextEditingController();
+  final _productNameController = TextEditingController();
   final _categoryController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _qtyController = TextEditingController();
@@ -39,8 +39,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final newItem = Item(
-        itemName: _itemNameController.text,
+      final newProduct = Product(
+        productName: _productNameController.text,
         category:
             _categoryController.text.isEmpty ? null : _categoryController.text,
         description: _descriptionController.text.isEmpty
@@ -48,24 +48,25 @@ class _AddItemScreenState extends State<AddItemScreen> {
             : _descriptionController.text,
         qty: int.parse(_qtyController.text),
         unitPrice: double.parse(_unitPriceController.text),
-        status: 1, // Default status to active
+        status: 'active', // Default status to active
       );
 
       try {
-        await _apiService.insertItem(newItem, _imageFile);
+        await _apiService.insertProduct(newProduct, _imageFile);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Item added successfully!'),
+            content: Text('Product added successfully!'),
             backgroundColor: Colors.green,
           ),
         );
         Navigator.pop(context, true); // Go back and indicate success
       } catch (e) {
+        print('Error adding product: $e'); // Added for debugging
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to add item: $e'),
+            content: Text('Failed to add product: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -75,7 +76,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   @override
   void dispose() {
-    _itemNameController.dispose();
+    _productNameController.dispose();
     _categoryController.dispose();
     _descriptionController.dispose();
     _qtyController.dispose();
@@ -87,7 +88,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Item'),
+        title: const Text('Add New Product'),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -115,8 +116,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
             padding: const EdgeInsets.all(16.0),
             children: [
               _buildTextField(
-                  controller: _itemNameController,
-                  label: 'Item Name',
+                  controller: _productNameController,
+                  label: 'Product Name',
                   icon: Icons.label_important),
               _buildTextField(
                   controller: _categoryController,
@@ -162,7 +163,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
               ElevatedButton.icon(
                 onPressed: _submitForm,
                 icon: const Icon(Icons.add_circle_outline),
-                label: const Text('Add Item'),
+                label: const Text('Add Product'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   textStyle: const TextStyle(fontSize: 18),
